@@ -23,15 +23,18 @@ RUN for pkg in body-parser cors axios cross-spawn express isexe jest path-key sh
     && cd /root/.cache/opencode/packages/@opencode-ai/sdk \
     && npm install @opencode-ai/sdk --ignore-scripts --no-audit --no-fund --loglevel=error
 
-# 3) 网关（自写，OpenAI 兼容转换）
+# 4) CLI 内置模型表（匿名免费模式需要：serve 不联网也能列出模型）
+COPY models.json /root/.cache/opencode/models.json
+
+# 5) 网关（自写，OpenAI 兼容转换）
 COPY gateway/gateway.js /app/gateway.js
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# 4) 认证：两种方式二选一
+# 6) 认证：两种方式二选一
 #    a) OAuth（推荐，不用申请 key）：把本机 ~/.local/share/opencode/auth.json 挂载到 /app/auth.json
 #    b) API key（旧方式）：设 OPENCODE_API_KEY=oc_sk_xxx 环境变量
-#    若两者都无，CLI 无法访问免费模型（启动会失败并提示）
+#    若两者都无，CLI 以匿名（Bearer public）模式运行——官方支持，免费模型可用（模型表来自 COPY 的 models.json）
 ENV OPENCODE_AUTH_FILE=/app/auth.json
 
 # 运行时配置
