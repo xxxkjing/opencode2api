@@ -1,0 +1,14 @@
+services:
+  opencode2api:
+    build: .
+    container_name: opencode2api
+    ports:
+      - "10000:10000"
+    environment:
+      # 网关鉴权（客户端请求 OpenAI API 时带的 Bearer key）——必填
+      - OC2A_AUTH=${OC2A_AUTH:-sk-opencode2api}
+      # opencode 官方 key（oc_sk_ 开头）——必填
+      - OPENCODE_API_KEY=${OPENCODE_API_KEY}
+      # 可选：OAuth access token（登录 console 后生成的 OPENCODE_CONSOLE_TOKEN）
+      - OPENCODE_CONSOLE_TOKEN=${OPENCODE_CONSOLE_TOKEN:-}
+    restart: unless-stopped
