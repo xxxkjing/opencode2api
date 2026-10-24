@@ -4,12 +4,16 @@ FROM node:24-slim
 
 WORKDIR /app
 
-# 1) 官方 opencode CLI（bun 编译二进制）
+# 1) 基础工具（slim 镜像没有 curl，entrypoint 健康检查需要）
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2) 官方 opencode CLI（bun 编译二进制）
 RUN npm install -g opencode-ai@1.19.4 --loglevel=error \
     && node $(npm root -g)/opencode-ai/postinstall.mjs \
     && mv $(npm root -g)/opencode-ai/bin/opencode.exe /usr/local/bin/opencode
 
-# 2) 预装 opencode serve 按需依赖到缓存（避免运行时联网 npm install）
+# 3) 预装 opencode serve 按需依赖到缓存（避免运行时联网 npm install）
 #    列表来自运行观察（MITM）：express 系 + @opencode-ai/sdk
 RUN for pkg in body-parser cors axios cross-spawn express isexe jest path-key shebang-command shebang-regex supertest which; do \
       mkdir -p /root/.cache/opencode/packages/$pkg && cd /root/.cache/opencode/packages/$pkg \
